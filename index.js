@@ -105,6 +105,7 @@ const renderWeather = (data) => {
   }
 };
 
+// Handle standard --help, -h command line arguments and also warn user to register their own API
 const [,, ...args] = process.argv;
 args.forEach( (argument) => {
   if (argument === "--help" || argument === "-h") {
