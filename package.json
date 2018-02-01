@@ -1,6 +1,6 @@
 {
   "name": "mausam",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple cli to show weather for the location",
   "main": "index.js",
   "author": "Vinit Kumar <vinit1414.08@bitmesra.ac.in>",

@@ -2,9 +2,8 @@
 
 const https = require('https');
 const http = require('http');
-const imgcat = require('imgcat');
 const geoipURI = `https://telize.j3ss.co/geoip`;
-const APIKEY = process.env.WUNDER_KEY;
+const APIKEY = process.env.WUNDER_KEY || '6d0b4cdd7d6d8a5e';
 
 function urlBuilder(type, location) {
   return `http://api.wunderground.com/api/${APIKEY}/${type}/q/${location.lat},${location.lng}.json`;
@@ -76,19 +75,32 @@ https.get(geoipURI, (res) => {
 
 
 const renderWeather = (data) => {
-  let currentWeather = `Current weather is ${data.weather} in ${data.display_location.full} for ${data.observation_time}. The temperature is ${data.temp_c}°C and feels like ${data.feelslike_c}°C`;
-  let humidity = `The humidity is ${data.relative_humidity}`;
-  let windSpeed = `The wind is ${data.wind_string} and blowing at a speed of ${data.wind_kph} km/hr`;
-  let visibility = `The visibility is ${data.visibility_km} kms`;
-  const pressure = `Current pressure is ${data.pressure_mb} mbar`;
-  console.log(currentWeather);
+  // console.log(data);
+  let locationAndTime = `Showing current weather in ${data.display_location.full} at ${data.observation_time_rfc822}.`
+  let temperature = `- The temperature is ${data.temp_c}°C and feels like ${data.feelslike_c}°C`;
+  let humidity = `- The humidity is ${data.relative_humidity}`;
+  let windSpeed = `- The wind is ${data.wind_string} and blowing at a speed of ${data.wind_kph} km/hrs from ${data.wind_dir}`;
+  let visibility = `- The visibility is ${data.visibility_km} kms`;
+  const pressure = `- Current pressure is ${data.pressure_mb} mbar`;
+  const precipiation = `- There is a ${data.precip_today_metric}% chance of rain today`;
+  let developerAdvice = `We are using a free version of the weather API. It is recommended that you go ahead and register your own API key else we will hit rate-limits. https://www.wunderground.com/weather/api.\n`;
+  let apiUsage = `Once you have the API key, run: export WUNDER_KEY='api_key_from_wundergrond'`;
   console.log('\n');
+  console.log(locationAndTime);
+  console.log('\n');
+  console.log(temperature);
   console.log(humidity);
   console.log(windSpeed);
   console.log(visibility);
   console.log(pressure);
+  console.log(precipiation);
   console.log('\n');
   console.log(`Powered by: ${data.image.title}`);
-  imgcat(data.image.url, {log: true})
   console.log(`Link: ${data.image.link}`);
+  console.log('\n');
+  if (!process.env.WUNDER_KEY) {
+    console.log(developerAdvice);
+    console.log(apiUsage);
+  }
 };
+
