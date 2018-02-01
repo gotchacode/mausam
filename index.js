@@ -83,7 +83,6 @@ const renderWeather = (data) => {
   const pressure = `Current pressure is ${data.pressure_mb} mbar`;
   console.log(currentWeather);
   console.log('\n');
-  console.log('\n');
   console.log(humidity);
   console.log(windSpeed);
   console.log(visibility);
