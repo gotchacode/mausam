@@ -78,14 +78,17 @@ https.get(geoipURI, (res) => {
 const renderWeather = (data) => {
   let currentWeather = `Current weather is ${data.weather} in ${data.display_location.full} for ${data.observation_time}. The temperature is ${data.temp_c}°C and feels like ${data.feelslike_c}°C`;
   let humidity = `The humidity is ${data.relative_humidity}`;
-  let windSpeed = `The wind is ${data.wind_string} and blowing at speed of ${data.wind_kph} km/hr`;
+  let windSpeed = `The wind is ${data.wind_string} and blowing at a speed of ${data.wind_kph} km/hr`;
   let visibility = `The visibility is ${data.visibility_km} kms`;
   const pressure = `Current pressure is ${data.pressure_mb} mbar`;
   console.log(currentWeather);
+  console.log('\n');
+  console.log('\n');
   console.log(humidity);
   console.log(windSpeed);
   console.log(visibility);
   console.log(pressure);
+  console.log('\n');
   console.log(`Powered by: ${data.image.title}`);
   imgcat(data.image.url, {log: true})
   console.log(`Link: ${data.image.link}`);
