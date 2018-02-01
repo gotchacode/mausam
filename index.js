@@ -9,70 +9,71 @@ function urlBuilder(type, location) {
   return `http://api.wunderground.com/api/${APIKEY}/${type}/q/${location.lat},${location.lng}.json`;
 }
 
-https.get(geoipURI, (res) => {
-  const { statusCode } = res;
-  let error;
-  if (statusCode !== 200) {
-    error = new Error('Request Failed');
-  }
-
-  if (error) {
-    console.log(error.message);
-    res.resume();
-    return;
-  }
-
-  res.setEncoding('utf8');
-
-  let rawData = '';
-
-  res.on('data', (chunk) => { rawData += chunk; });
-  res.on('end', () => {
-    try {
-      const parsedData = JSON.parse(rawData);
-      let location = {
-        lat: parsedData.latitude,
-        lng: parsedData.longitude
-      };
-      const weatherURL = urlBuilder('conditions/forecast/astronomy', location);
-      http.get(weatherURL, (res) => {
-        const { statusCode } = res;
-        let error;
-        const contentType = res.headers['content-type'];
-        if (statusCode !== 200) {
-          error = new Error('Request failed to complete');
-        } else if (!/^application\/json/.test(contentType)) {
-          error = new Error('Invalid content-type.\n' +
-                            `Expected application/json but received ${contentType}`);
-        }
-
-        if (error) {
-          console.log(error.message);
-          res.resume();
-          return;
-        }
-
-        res.setEncoding('utf8');
-        let rawWeatherData = '';
-
-        res.on('data', (chunk) => { rawWeatherData += chunk; });
-        res.on('end', () => {
-          try {
-            const weatherData = JSON.parse(rawWeatherData);
-            renderWeather(weatherData.current_observation);
-          } catch (e) {
-            console.log(e.message);
-          }
-        });
-
-
-      });
-    } catch(e) {
-      console.log(e.message);
+const weatherFetch = () => {
+  https.get(geoipURI, (res) => {
+    const { statusCode } = res;
+    let error;
+    if (statusCode !== 200) {
+      error = new Error('Request Failed');
     }
-  });
-});
 
+    if (error) {
+      console.log(error.message);
+      res.resume();
+      return;
+    }
+
+    res.setEncoding('utf8');
+
+    let rawData = '';
+
+    res.on('data', (chunk) => { rawData += chunk; });
+    res.on('end', () => {
+      try {
+        const parsedData = JSON.parse(rawData);
+        let location = {
+          lat: parsedData.latitude,
+          lng: parsedData.longitude
+        };
+        const weatherURL = urlBuilder('conditions/forecast/astronomy', location);
+        http.get(weatherURL, (res) => {
+          const { statusCode } = res;
+          let error;
+          const contentType = res.headers['content-type'];
+          if (statusCode !== 200) {
+            error = new Error('Request failed to complete');
+          } else if (!/^application\/json/.test(contentType)) {
+            error = new Error('Invalid content-type.\n' +
+                              `Expected application/json but received ${contentType}`);
+          }
+
+          if (error) {
+            console.log(error.message);
+            res.resume();
+            return;
+          }
+
+          res.setEncoding('utf8');
+          let rawWeatherData = '';
+
+          res.on('data', (chunk) => { rawWeatherData += chunk; });
+          res.on('end', () => {
+            try {
+              const weatherData = JSON.parse(rawWeatherData);
+              renderWeather(weatherData.current_observation);
+            } catch (e) {
+              console.log(e.message);
+            }
+          });
+
+
+        });
+      } catch(e) {
+        console.log(e.message);
+      }
+    });
+  });
+};
 
 const renderWeather = (data) => {
   // console.log(data);
@@ -104,3 +105,17 @@ const renderWeather = (data) => {
   }
 };
 
+const [,, ...args] = process.argv;
+args.forEach( (argument) => {
+  if (argument === "--help" || argument === "-h") {
+    let developerAdvice = `We are using a free version of the weather API. It is recommended that you go ahead and register your own API key else we will hit rate-limits. https://www.wunderground.com/weather/api.\n`;
+    let apiUsage = `Once you have the API key, run: export WUNDER_KEY='api_key_from_wundergrond'`;
+    console.log('Usage: Rum `mausam` on your terminal\n');
+    console.log(developerAdvice);
+    console.log(apiUsage);
+  }   
+});
+
+if (args.length === 0) {
+  weatherFetch();
+}
