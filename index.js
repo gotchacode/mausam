@@ -2,15 +2,13 @@
 
 const https = require('https');
 const http = require('http');
+const imgcat = require('imgcat');
 const geoipURI = `https://telize.j3ss.co/geoip`;
 const APIKEY = process.env.WUNDER_KEY;
 
-
-console.log('APIKEY', APIKEY);
 function urlBuilder(type, location) {
   return `http://api.wunderground.com/api/${APIKEY}/${type}/q/${location.lat},${location.lng}.json`;
 }
-
 
 https.get(geoipURI, (res) => {
   const { statusCode } = res;
@@ -41,9 +39,12 @@ https.get(geoipURI, (res) => {
       http.get(weatherURL, (res) => {
         const { statusCode } = res;
         let error;
-
+        const contentType = res.headers['content-type'];
         if (statusCode !== 200) {
           error = new Error('Request failed to complete');
+        } else if (!/^application\/json/.test(contentType)) {
+          error = new Error('Invalid content-type.\n' +
+                            `Expected application/json but received ${contentType}`);
         }
 
         if (error) {
@@ -58,8 +59,8 @@ https.get(geoipURI, (res) => {
         res.on('data', (chunk) => { rawWeatherData += chunk; });
         res.on('end', () => {
           try {
-            const weatherData = JSON.parse(rawWeatherData)
-            console.log(weatherData);
+            const weatherData = JSON.parse(rawWeatherData);
+            renderWeather(weatherData.current_observation);
           } catch (e) {
             console.log(e.message);
           }
@@ -74,8 +75,18 @@ https.get(geoipURI, (res) => {
 });
 
 
-
-const [,, ...args] = process.argv;
-
-console.log(`Hello World ${args}`);
-
+const renderWeather = (data) => {
+  let currentWeather = `Current weather is ${data.weather} in ${data.display_location.full} for ${data.observation_time}. The temperature is ${data.temp_c}°C and feels like ${data.feelslike_c}°C`;
+  let humidity = `The humidity is ${data.relative_humidity}`;
+  let windSpeed = `The wind is ${data.wind_string} and blowing at speed of ${data.wind_kph} km/hr`;
+  let visibility = `The visibility is ${data.visibility_km} kms`;
+  const pressure = `Current pressure is ${data.pressure_mb} mbar`;
+  console.log(currentWeather);
+  console.log(humidity);
+  console.log(windSpeed);
+  console.log(visibility);
+  console.log(pressure);
+  console.log(`Powered by: ${data.image.title}`);
+  imgcat(data.image.url, {log: true})
+  console.log(`Link: ${data.image.link}`);
+};

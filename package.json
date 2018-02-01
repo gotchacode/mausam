@@ -4,5 +4,9 @@
   "description": "A simple cli to show weather for the location",
   "main": "index.js",
   "author": "Vinit Kumar <vinit1414.08@bitmesra.ac.in>",
-  "license": "GPLv2"
+  "license": "GPLv2",
+  "dependencies": {
+    "console-png": "^1.2.1",
+    "imgcat": "^2.3.0"
+  }
 }
