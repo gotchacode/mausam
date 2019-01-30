@@ -6,6 +6,7 @@
   "author": "Vinit Kumar <vinit1414.08@bitmesra.ac.in>",
   "license": "GPLv2",
   "dependencies": {
+    "hoek": "^4.2.1"
   },
   "bin": {
     "mausam": "./index.js"
